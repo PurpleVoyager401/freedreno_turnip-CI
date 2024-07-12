@@ -8,7 +8,7 @@ workdir="$(pwd)/turnip_workdir"
 magiskdir="$workdir/turnip_module"
 ndkver="android-ndk-r26c"
 sdkver="29"
-mesasrc="https://gitlab.freedesktop.org/mesa/mesa/-/archive/main/mesa-main.zip"
+mesasrc="https://github.com/SolDev69/unified-mesa-project/archive/refs/heads/main.zip"
 clear
 
 # there are 4 functions here, simply comment to disable.
@@ -55,11 +55,11 @@ prepare_workdir(){
 	unzip "$ndkver"-linux.zip  &> /dev/null
 
 	echo "Downloading mesa source (~50 MB) ..." $'\n'
-	curl "$mesasrc" --output mesa-main.zip &> /dev/null
+	wget -O ump-main.zip "$mesasrc" &> /dev/null
 	###
 	echo "Exracting mesa source to a folder ..." $'\n'
-	unzip mesa-main.zip &> /dev/null
-	cd mesa-main
+	unzip ump-main.zip &> /dev/null
+	cd unified-mesa-project-main
 }
 
 
@@ -85,7 +85,7 @@ endian = 'little'
 EOF
 
 	echo "Generating build files ..." $'\n'
-	meson build-android-aarch64 --cross-file "$workdir"/mesa-main/android-aarch64 -Dbuildtype=release -Dplatforms=android -Dplatform-sdk-version=$sdkver -Dandroid-stub=true -Dgallium-drivers= -Dvulkan-drivers=freedreno -Dvulkan-beta=true -Dfreedreno-kmds=kgsl -Db_lto=true &> "$workdir"/meson_log
+	meson build-android-aarch64 --cross-file "$workdir"/unified-mesa-project-main/android-aarch64 -Dbuildtype=release -Dplatforms=android -Dplatform-sdk-version=$sdkver -Dandroid-stub=true -Dgallium-drivers= -Dvulkan-drivers=freedreno -Dvulkan-beta=true -Dfreedreno-kmds=kgsl -Db_lto=true &> "$workdir"/meson_log
 
 	echo "Compiling build files ..." $'\n'
 	ninja -C build-android-aarch64 &> "$workdir"/ninja_log
@@ -95,7 +95,7 @@ EOF
 
 port_lib_for_magisk(){
 	echo "Using patchelf to match soname ..."  $'\n'
-	cp "$workdir"/mesa-main/build-android-aarch64/src/freedreno/vulkan/libvulkan_freedreno.so "$workdir"
+	cp "$workdir"/unified-mesa-project-main/build-android-aarch64/src/freedreno/vulkan/libvulkan_freedreno.so "$workdir"
 	cd "$workdir"
 	patchelf --set-soname vulkan.adreno.so libvulkan_freedreno.so
 	mv libvulkan_freedreno.so vulkan.adreno.so
@@ -134,8 +134,8 @@ id=turnip
 name=turnip
 version=v1.0
 versionCode=1
-author=MrMiy4mo
-description=Turnip is an open-source vulkan driver for devices with adreno GPUs.
+author=PurpleVoyager401
+description=Open-source Vulkan driver build from Unified Mesa Project drivers repo.
 EOF
 
 	cat <<EOF >"customize.sh"
